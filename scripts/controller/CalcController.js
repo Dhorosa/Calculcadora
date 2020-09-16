@@ -19,6 +19,8 @@ class CalcController {
         setInterval(()=>{
            this.setDisplayDateTime();
         }, 1000);          
+
+        this.setLastNumbertoDisplay();
     }
 
     addEventListenerAll(element, events, fn){
@@ -29,9 +31,11 @@ class CalcController {
 
     clearAll(){
         this._operation = [];
+        this.setLastNumbertoDisplay();
     }
     cancelEntry(){
         this._operation.pop();
+        this.setLastNumbertoDisplay();
     }
 
     setError(){
@@ -45,26 +49,85 @@ class CalcController {
 
 
     }   
+    setLastOperation(value){
+            this._operation[this._operation.length - 1] = value
+
+
+        }
+
     isOperatior(value){
        
        return (['+','-','/','*','%'].indexOf(value) > -1);
 
     }
-    setLastOperation(value){
-        this._operation[this._operation.length - 1] = value
-
-
-    }0
+    
     
     pushOperation(value){
 
         this._operation.push(value);
+        
         if (this._operation.length > 3) {
 
-            console.log(this._operation);
+            this.calc();
 
         }
     }
+
+    calc(){
+
+        let last = '';
+
+        if (this._operation.length > 3 ){
+            last = this._operation.pop();
+        }
+
+   
+
+        let result = eval((this._operation).join(""));
+
+        if (last == '%'){
+
+            result = (result /100);
+
+            this._operation = [result];
+
+        }else{
+
+           this._operation = [result];
+           
+           if(last)this._operation.push(last);  
+        }
+
+        
+
+
+        this.setLastNumbertoDisplay();
+
+    }
+    setLastNumbertoDisplay(){
+
+        let lastNumber;
+
+        for (let i = this._operation.length-1; i >= 0; i--){
+
+            if (!this.isOperatior(this._operation[i])){
+
+                lastNumber = this._operation[i];
+                break;
+            }
+                 
+            
+
+           
+
+        } console.log(this._operation);
+
+        if(!lastNumber) lastNumber = 0;
+        this.displayCalc = lastNumber;
+        
+    }
+       
+
 
     addOperation(value){
         
@@ -73,12 +136,17 @@ class CalcController {
             if (this.isOperatior(value)){
 
                this.setLastOperation(value);
+                console.log('caiu no Primeiro');
+
+               
 
             }else if(isNaN(value) ){
-                console.log(value); 
-           
+                console.log('caiu no else if Primeiro')
+                this.setLastNumbertoDisplay();
             } else{
                 this.pushOperation(value);
+                console.log('caiu no SEGUNDO')
+                this.setLastNumbertoDisplay();
             }   
             
 
@@ -86,16 +154,20 @@ class CalcController {
             if (this.isOperatior(value)) {
 
                 this.pushOperation(value); 
-
+                console.log('caiu no TERCEIRO')
+                this.setLastNumbertoDisplay();
+                
             } else{
                 let newValue = this.getLastOparetion().toString() + value.toString();
                 this.setLastOperation(parseInt(newValue));
+                console.log('caiu no QUARTO')
+                this.setLastNumbertoDisplay();
               }
 
             }
 
             
-         console.log(this._operation);
+         
     
     }
       
@@ -133,7 +205,7 @@ class CalcController {
                 break;
 
             case 'igual':
-                
+                this.calc();
                 break;
             case 'ponto':
                 this.addOperation('.');
