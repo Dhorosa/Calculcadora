@@ -1,6 +1,10 @@
 class CalcController {
 
     constructor(){
+
+
+         this._audio = new Audio('click.mp3');
+         this._audioOnOff = false;
          
          this._lastOperator = "";
          this._lastNumber="";   
@@ -15,7 +19,38 @@ class CalcController {
          this._currentDate;
          this.initialize();
          this.initButtonsEvents();
+         this.InitEventKeyBoard();
          
+    }
+
+    pastFromClipBoard(){
+
+        document.addEventListener('paste', e=>{
+
+            let text = e.clipboardData.getData('text');
+
+            this.displayCalc = parseFloat(text);
+
+
+        })
+
+    }
+
+    copyToClipBoard(){
+
+         let input = document.createElement('input');
+
+         input.value = this.displayCalc;
+
+         document.body.appendChild(input);
+
+         input.select();
+
+         document.execCommand('Copy');
+
+         input.remove();
+
+
     }
 
     initialize(){
@@ -25,12 +60,98 @@ class CalcController {
         }, 1000);          
 
         this.setLastNumbertoDisplay();
+        this.pastFromClipBoard();
+
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+
+            btn.addEventListener('dblclick', e=>{
+
+                this.toggleAudio();
+
+            })
+
+        })
+
     }
+
+    toggleAudio(){
+
+        this._audioOnOff = !this._audioOnOff;
+
+    }
+
+    playAudio(){
+        if(this._audioOnOff){
+
+            this._audio.play()  ;
+
+        }
+
+    }
+
 
     addEventListenerAll(element, events, fn){
         events.split(' ').forEach(event=>{
             element.addEventListener(event, fn, false);
         })
+    }
+    InitEventKeyBoard(){
+        document.addEventListener('keyup', e=>{
+
+            this.playAudio();
+          
+            switch(e.key){
+
+                case 'Escape':
+                    this.clearAll();
+                    break;
+    
+                case 'Backspace':
+                    this.cancelEntry();
+                    break;
+    
+                case '+':
+                case '-':
+                case '/':   
+                case '*':      
+                this.addOperation(e.key);
+                    break;
+                       
+                case '%':
+                    this.addOperation('%');
+                    break;
+    
+                case 'Enter':
+                    this.calc();
+                    break;
+                case '.':
+                case ',':    
+                    this.addDot('');
+                    break;
+    
+    
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    this.addOperation(parseInt(e.key));
+                    break;
+
+                case 'c':
+                  if(e.ctrlKey) this.copyToClipBoard();
+
+                  break;
+                 
+            }
+            
+        })
+
     }
 
     clearAll(){
@@ -80,7 +201,8 @@ class CalcController {
         }
     }
 
-    getResult(){
+    getResult(){ 
+
         return eval((this._operation).join(""));
 
     }
@@ -167,6 +289,9 @@ class CalcController {
     addDot(){
         let lastOperation = this.getLastOparetion();
 
+        if (typeof lastOperation === "string" && lastOperation.split("").indexOf(".") > -1) return ;
+        
+
         if (this.isOperatior(lastOperation) || (!lastOperation)){
             this.pushOperation('0.');
         } else {
@@ -202,7 +327,7 @@ class CalcController {
                 
             } else{
                 let newValue = this.getLastOparetion().toString() + value.toString();
-                this.setLastOperation(parseFloat(newValue));
+                this.setLastOperation(newValue);
                
                 this.setLastNumbertoDisplay();
               }
@@ -216,6 +341,8 @@ class CalcController {
       
 
     execBtn(value){
+
+        this.playAudio();
 
         switch(value){
 
