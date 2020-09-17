@@ -83,6 +83,8 @@ class CalcController {
     playAudio(){
         if(this._audioOnOff){
 
+
+            this._audio.currentTime = 0;
             this._audio.play()  ;
 
         }
@@ -203,7 +205,16 @@ class CalcController {
 
     getResult(){ 
 
+
+        try{
         return eval((this._operation).join(""));
+        }catch(e){
+            setTimeout(()=>{
+                this.setError();
+            }, 0);
+
+
+        }
 
     }
     calc(){
@@ -283,7 +294,7 @@ class CalcController {
 
         this.displayCalc = lastNumber;
 
-        console.log(this._operation);
+      
     }
        
     addDot(){
@@ -449,6 +460,12 @@ class CalcController {
 
     }
     set displayCalc(value){
+
+        if( value.toString().length > 10){
+            this.setError();
+            return false;
+        }
+
         this._displayCalcEl.innerHTML = value;
     }
     get currentDate(){
